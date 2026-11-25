@@ -1,0 +1,52 @@
+PLATFORM DEGERLENDIRME 1.0.0  (Qt / PySide6)   created by EYALTIRIKLI
+=====================================================================
+
+Ne yapar: Hexagon raporunu (.xlsx) okur, her platformu PASS / FAIL
+degerlendirir, sonucu Excel'e aktarir.
+  - "Excel yukle" (ya da dosyayi pencereye surukleyin).
+  - Ustte parca bilgileri (Summary sayfasi): Part No, Serial No,
+    Operation, Operator, CMM, NC W/S, Spindle, Date, Company, Location.
+    Her biri basligin altindaki hucreden okunur; Part No bulunamazsa B3.
+  - Sagda GENEL SONUC: tum platformlar PASS ise yesil PASS, biri bile
+    FAIL ise kirmizi FAIL.
+  - PLATFORMLAR tablosu: her platformun sonucu ve sayilari.  Satirin
+    ustune gelince FAIL sebebi yazar.  Satira tiklayinca sagdaki
+    NOKTALAR tablosunda o platform secilir.
+  - NOKTALAR: Platform sayfasindaki butun degerler; .005-.010 arasi sari,
+    .010 ustu kirmizi.
+
+Platform sayfasi: A sutununda nokta sirasi (1, 2, 3 ...), B'den itibaren
+her sutun bir platform (soldan saga #1, #2 ...).  Yalniz numarali satirlar
+okunur; tablonun altindaki tolerans satirlari alinmaz.  Bos hucre nokta
+sayilmaz.
+
+KURAL (her platform, N = o platformdaki nokta sayisi):
+  |sapma| <= .005              -> iceride (.010 profil)
+  .005 < |sapma| <= .010       -> "OUT PROFILE .010" noktasi
+  |sapma| > .010               -> "OUT PROFILE .020" noktasi
+  PASS =  .020 noktasi YOK
+          ve .010 noktasi sayisi < N x %5
+          ve |ortalama sapma| <= .004  (.008 profil)
+  Tam .004 / .005 / .010 kabul (iceride sayilir).
+
+EXCEL CIKTISI (3 sayfa):
+  PLATFORM       PLATFORM NO | OUT PROFILE .010 | OUT PROFILE .020 |
+                 PASS/FAIL (yesil / kirmizi) | ortalama | nokta | %5 sinir |
+                 max |sapma| | ozellik adi;  altta GENEL SONUC
+  PARCA BILGISI  Summary bilgileri + kaynak dosya
+  NOKTALAR       tum noktalar renkli
+
+1) KURULUM (bir kere, Windows cmd):
+    py -m pip install PySide6 openpyxl pyinstaller
+  Denemek icin derlemeden calistirma:
+    py plat_app.py
+
+2) DERLEME (Windows, cmd):
+  py -m PyInstaller --onedir --windowed --noupx --icon=plat_icon.ico ^
+    --name "PLATFORM DEGERLENDIRME" plat_app.py
+
+  Exe:  dist\PLATFORM DEGERLENDIRME\PLATFORM DEGERLENDIRME.exe
+  (Not: komut "py -m PyInstaller" - buyuk P ve I ile.)
+
+Dosyalar: plat_app.py (calistirilan), plat_core.py, plat_theme.py,
+plat_icon.ico, tests\test_core.py (istege bagli: py tests\test_core.py)
