@@ -17,20 +17,23 @@ VERSION = "2.0.0"
 HEAD_ROW = 10            # Excel row of the table header (same as in the macro)
 
 
-def build(out):
+def build(out, macro=True):
     with open(os.path.join(HERE, "PlatformAnaliz.bas"), encoding="ascii") as f:
         src = f.read()
+    if out.lower().endswith(".xlsx"):
+        macro = False
     binp = os.path.join(tempfile.mkdtemp(), "vbaProject.bin")
     vba_bin.build([("ThisWorkbook", "doc_wb", ""), ("shAnaliz", "doc_ws", ""),
                    ("shNokta", "doc_ws", ""), ("PlatformAnaliz", "std", src)], binp)
 
     wb = xlsxwriter.Workbook(out)
-    wb.set_vba_name("ThisWorkbook")
-    wb.add_vba_project(binp)
     ws = wb.add_worksheet("ANALİZ")
-    ws.set_vba_name("shAnaliz")
     wn = wb.add_worksheet("NOKTALAR")
-    wn.set_vba_name("shNokta")
+    if macro:
+        wb.set_vba_name("ThisWorkbook")
+        wb.add_vba_project(binp)
+        ws.set_vba_name("shAnaliz")
+        wn.set_vba_name("shNokta")
 
     F = lambda **k: wb.add_format(dict({"font_name": "Calibri", "font_size": 11}, **k))
     title = F(bold=True, font_size=16)

@@ -31,7 +31,7 @@ End Sub
 
 Public Sub SonucuKaydet()
     Dim f As Variant, yeni As Workbook, s As Worksheet, k As Long
-    If Len(CStr(shAnaliz.Cells(HEAD_ROW + 1, 1).Value)) = 0 Then
+    If Len(CStr(AnalizSayfasi().Cells(HEAD_ROW + 1, 1).Value)) = 0 Then
         MsgBox "Once EXCEL YUKLE ile bir rapor yukleyin.", vbInformation, BASLIK
         Exit Sub
     End If
@@ -39,7 +39,7 @@ Public Sub SonucuKaydet()
                                       FileFilter:="Excel (*.xlsx),*.xlsx")
     If VarType(f) = vbBoolean Then Exit Sub
     Application.ScreenUpdating = False
-    ThisWorkbook.Worksheets(Array(shAnaliz.Name, shNokta.Name)).Copy
+    ThisWorkbook.Worksheets(Array(AnalizSayfasi().Name, NoktaSayfasi().Name)).Copy
     Set yeni = ActiveWorkbook
     For Each s In yeni.Worksheets
         For k = s.Shapes.Count To 1 Step -1
@@ -80,7 +80,7 @@ Bitir:
     On Error Resume Next
     If Not wb Is Nothing Then wb.Close SaveChanges:=False
     ThisWorkbook.Activate
-    shAnaliz.Activate
+    AnalizSayfasi().Activate
     Application.EnableEvents = True
     Application.ScreenUpdating = True
     If Len(msg) > 0 Then MsgBox msg, vbExclamation, BASLIK
@@ -175,7 +175,7 @@ SonrakiSutun:
 
     ' ---- ANALIZ sayfasi
     Dim sh As Worksheet, rg As Range, o() As Variant, adr As Variant, genel As Boolean
-    Set sh = shAnaliz
+    Set sh = AnalizSayfasi()
     adr = Array("B4", "F4", "B5", "F5", "B6", "F6", "B7", "F7", "B8", "F8")
     For i = 0 To 9
         sh.Range(adr(i)).Value = "'" & info(i + 1)
@@ -235,7 +235,7 @@ SonrakiSutun:
 
     ' ---- NOKTALAR sayfasi
     Dim sn As Worksheet
-    Set sn = shNokta
+    Set sn = NoktaSayfasi()
     sn.Cells.Clear
     sn.Cells(1, 1).Value = "NOKTA"
     Cerceve sn.Cells(1, 1)
@@ -272,6 +272,28 @@ SonrakiSutun:
     Next i
     sn.Columns(1).ColumnWidth = 8
     sn.Range(sn.Columns(2), sn.Columns(np + 1)).ColumnWidth = 9
+End Function
+
+' ---------------------------------------------------------------- sayfalar
+
+' ANALIZ ve NOKTALAR sayfalari adlarindan bulunur (yoksa 1. ve 2. sayfa)
+Private Function AnalizSayfasi() As Worksheet
+    Set AnalizSayfasi = BuSayfa("anal", 1)
+End Function
+
+Private Function NoktaSayfasi() As Worksheet
+    Set NoktaSayfasi = BuSayfa("nokta", 2)
+End Function
+
+Private Function BuSayfa(ByVal bas As String, ByVal sira As Long) As Worksheet
+    Dim s As Worksheet
+    For Each s In ThisWorkbook.Worksheets
+        If InStr(1, Norm(s.Name), bas) = 1 Then
+            Set BuSayfa = s
+            Exit Function
+        End If
+    Next s
+    Set BuSayfa = ThisWorkbook.Worksheets(sira)
 End Function
 
 ' ---------------------------------------------------------------- okuma
@@ -434,8 +456,8 @@ End Function
 
 Private Function DosyaAdi() As String
     Dim s As String, ch As Variant
-    s = Trim$(CStr(shAnaliz.Range("B4").Value))
-    If Len(Trim$(CStr(shAnaliz.Range("F4").Value))) > 0 Then s = s & "_" & Trim$(CStr(shAnaliz.Range("F4").Value))
+    s = Trim$(CStr(AnalizSayfasi().Range("B4").Value))
+    If Len(Trim$(CStr(AnalizSayfasi().Range("F4").Value))) > 0 Then s = s & "_" & Trim$(CStr(AnalizSayfasi().Range("F4").Value))
     If Len(s) = 0 Then s = "RAPOR"
     For Each ch In Array("\", "/", ":", "*", "?", """", "<", ">", "|")
         s = Replace(s, ch, "_")
