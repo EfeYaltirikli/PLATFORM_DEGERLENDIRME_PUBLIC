@@ -175,7 +175,7 @@ class ResultModel(QAbstractTableModel):
             if c == 1:
                 return QColor(PASS_BG if p["pass"] else FAIL_BG)
             if c == 2 and p["c010"]:
-                return QColor(lv[1 if p["c010"] < p["limit"] else 2][0])
+                return QColor(lv[1 if p["c010"] <= p["limit"] else 2][0])
             if c == 3 and p["c020"]:
                 return QColor(lv[2][0])
             if c == 4 and not p["avg_ok"]:
@@ -184,7 +184,7 @@ class ResultModel(QAbstractTableModel):
             if c == 1:
                 return QColor(PASS_FG)
             if c == 2 and p["c010"]:
-                return QColor(lv[1 if p["c010"] < p["limit"] else 2][1])
+                return QColor(lv[1 if p["c010"] <= p["limit"] else 2][1])
             if c == 3 and p["c020"]:
                 return QColor(lv[2][1])
             if c == 4 and not p["avg_ok"]:
@@ -197,8 +197,8 @@ class ResultModel(QAbstractTableModel):
             why = []
             if p["c020"]:
                 why.append("%d nokta ±.010 dışında" % p["c020"])
-            if p["c010"] >= p["limit"]:
-                why.append(".005–.010 arası %d nokta (sınır < %d)" % (p["c010"], p["limit"]))
+            if p["c010"] > p["limit"]:
+                why.append(".005–.010 arası %d nokta (sınır %d)" % (p["c010"], p["limit"]))
             if not p["avg_ok"]:
                 why.append("ortalama %.5f  (±.004 dışında)" % p["avg"])
             return ("FAIL: " + ";  ".join(why)) if why else \
@@ -352,7 +352,7 @@ class Window(QMainWindow):
         b.addLayout(top)
 
         rule = label("Kural (her platform):  |sapma| ≤ .005 içeride  ·  .005 < |sapma| ≤ .010 "
-                     "nokta sayısı < toplam noktanın %5'i (yuvarlanmış)  ·  |sapma| > .010 nokta yok  ·  "
+                     "nokta sayısı ≤ toplam noktanın %5'i (yuvarlanmış)  ·  |sapma| > .010 nokta yok  ·  "
                      "|ortalama| ≤ .004.   Tam .004 / .005 / .010 kabul.", muted=True)
         rule.setWordWrap(True)
         b.addWidget(rule)

@@ -7,14 +7,14 @@ number of points in it:
     |dev| <= 0.005            -> inside the .010 profile, fine
     0.005 < |dev| <= 0.010    -> "OUT PROFILE .010" point
     |dev| > 0.010             -> "OUT PROFILE .020" point
-    PASS  when  .020 points == 0  and  .010 points < 5 % of N
+    PASS  when  .020 points == 0  and  .010 points <= 5 % of N (rounded)
           and  |average of the deviations| <= 0.004  (the .008 profile)
 """
 
 import os
 import re
 
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 APP_TITLE = "PLATFORM DEĞERLENDİRME"
 APP_CREDIT = "created by EYALTIRIKLI"
 
@@ -187,7 +187,7 @@ def judge(values):
     limit = int(n * PCT + 0.5)
     avg = (sum(pts) / n) if n else 0.0
     avg_ok = abs(avg) <= TOL_AVG + EPS
-    ok = n > 0 and c020 == 0 and c010 < limit and avg_ok
+    ok = n > 0 and c020 == 0 and c010 <= limit and avg_ok
     return {"n": n, "c010": c010, "c020": c020, "limit": limit,
             "avg": avg, "avg_ok": avg_ok,
             "max": max((abs(v) for v in pts), default=0.0),
@@ -297,7 +297,7 @@ def export_xlsx(rep, path):
         if p["c020"]:
             ws.cell(row=i, column=3).fill = fill(LEVEL_FILL[2])
         if p["c010"]:
-            ws.cell(row=i, column=2).fill = fill(LEVEL_FILL[1] if p["c010"] < p["limit"]
+            ws.cell(row=i, column=2).fill = fill(LEVEL_FILL[1] if p["c010"] <= p["limit"]
                                                  else LEVEL_FILL[2])
     r = len(rep["platforms"]) + 3
     ok = sum(1 for p in rep["platforms"] if p["pass"])
@@ -310,7 +310,7 @@ def export_xlsx(rep, path):
     ws.cell(row=r, column=2, value="%d / %d platform PASS" % (ok, len(rep["platforms"]))).font = norm
     ws.cell(row=r + 1, column=1,
             value="Kural: |sapma| ≤ .005 içeride;  .005 < |sapma| ≤ .010 nokta sayısı "
-                  "< toplam noktanın %5'i (tam sayıya yuvarlanır);  |sapma| > .010 nokta yok;  |ortalama| ≤ .004.").font = \
+                  "≤ toplam noktanın %5'i (tam sayıya yuvarlanır);  |sapma| > .010 nokta yok;  |ortalama| ≤ .004.").font = \
         Font(name="Calibri", size=9, italic=True, color="595959")
     for c, w in enumerate((18, 20, 20, 14, 12, 13, 10, 11, 30), 1):
         ws.column_dimensions[get_column_letter(c)].width = w
