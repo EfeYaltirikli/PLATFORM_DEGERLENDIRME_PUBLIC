@@ -1,3 +1,4 @@
-# PLATFORM DEGERLENDIRME 1.0.2
+# PLATFORM DEGERLENDIRME 2.0.0
 
-Kurulum ve derleme: OKU.txt
+Makrolu Excel: PLATFORM_DEGERLENDIRME.xlsm dosyasini indirin (Download raw).
+Kullanim: OKU.txt

@@ -1,53 +1,49 @@
-PLATFORM DEGERLENDIRME 1.0.2  (Qt / PySide6)   created by EYALTIRIKLI
-=====================================================================
+PLATFORM DEGERLENDIRME 2.0.0  (makrolu Excel)   created by EYALTIRIKLI
+=======================================================================
 
-Ne yapar: Hexagon raporunu (.xlsx) okur, her platformu PASS / FAIL
-degerlendirir, sonucu Excel'e aktarir.
-  - "Excel yukle" (ya da dosyayi pencereye surukleyin).
+KULLANIM
+  1. PLATFORM_DEGERLENDIRME.xlsm dosyasini acin.
+  2. Ilk acista ustte cikan sari seritte "Icerigi Etkinlestir / Enable
+     Content" deyin.
+     Dosya internetten (GitHub) indirildiyse Windows makrolari tamamen
+     engelleyebilir (kirmizi serit "Microsoft bu dosyadaki makrolari
+     engelledi").  O zaman: Excel'i kapatin -> dosyaya sag tik ->
+     Ozellikler -> alttaki "Engellemeyi kaldir / Unblock" kutusunu
+     isaretleyin -> Tamam.  Bir kere yapmaniz yeter.
+  3. EXCEL YUKLE  -> Hexagon raporunu (.xlsx) secin.  Analiz hemen yapilir.
+  4. SONUCU KAYDET (.xlsx) -> sonucu makrosuz ayri bir Excel olarak
+     kaydeder (ad: PartNo_SerialNo_PLATFORM.xlsx).
+
+ANALIZ sayfasi
   - Ustte parca bilgileri (Summary sayfasi): Part No, Serial No,
     Operation, Operator, CMM, NC W/S, Spindle, Date, Company, Location.
-    Her biri basligin altindaki hucreden okunur; Part No bulunamazsa B3.
-  - Sagda GENEL SONUC: tum platformlar PASS ise yesil PASS, biri bile
+  - Sagda GENEL SONUC: butun platformlar PASS ise yesil PASS, biri bile
     FAIL ise kirmizi FAIL.
-  - PLATFORMLAR tablosu: her platformun sonucu ve sayilari.  Satirin
-    ustune gelince FAIL sebebi yazar.  Satira tiklayinca sagdaki
-    NOKTALAR tablosunda o platform secilir.
-  - NOKTALAR: Platform sayfasindaki butun degerler; .005-.010 arasi sari,
-    .010 ustu kirmizi.
+  - Tablo: PLATFORM NO | OUT PROFILE .010 | OUT PROFILE .020 | AVERAGE |
+    TOTAL POINT COUNT | %5 LIMIT | MAX |DEV| | PASS/FAIL (en sagda).
+    .010 sayisi sinirdaysa sari, siniri asarsa kirmizi; .020 > 0 kirmizi;
+    ortalama +/-.004 disindaysa kirmizi.
+NOKTALAR sayfasi: butun degerler; .005-.010 arasi sari, .010 ustu kirmizi.
 
-Platform sayfasi: A sutununda nokta sirasi (1, 2, 3 ...), B'den itibaren
-her sutun bir platform (soldan saga #1, #2 ...).  Yalniz numarali satirlar
-okunur; tablonun altindaki tolerans satirlari alinmaz.  Bos hucre nokta
-sayilmaz.
+OKUMA
+  Platform sayfasi: A sutununda nokta sirasi (1, 2, 3 ...), B'den saga her
+  sutun bir platform (#1, #2 ...).  Basliginda "SPF" gecen sutun (her
+  noktadaki en buyuk deger) platform SAYILMAZ, atlanir.  Yalniz numarali
+  satirlar okunur; tablonun altindaki tolerans satirlari alinmaz.  Bos
+  hucre nokta sayilmaz.
 
-KURAL (her platform, N = o platformdaki nokta sayisi):
+KURAL (her platform, N = o platformdaki nokta sayisi)
   |sapma| <= .005              -> iceride (.010 profil)
   .005 < |sapma| <= .010       -> "OUT PROFILE .010" noktasi
   |sapma| > .010               -> "OUT PROFILE .020" noktasi
   PASS =  .020 noktasi YOK
-          ve .010 noktasi sayisi <= N x %5 (sinira esit gecer) (tam sayiya yuvarlanir:
-            40 -> 2, 30 -> 1,5 -> 2, 50 -> 2,5 -> 3, 45 -> 2,25 -> 2)
+          ve .010 noktasi sayisi <= N x %5  (tam sayiya yuvarlanir, ,5 yukari:
+             40 -> 2, 30 -> 2, 45 -> 2, 50 -> 3; sinira esit gecer)
           ve |ortalama sapma| <= .004  (.008 profil)
   Tam .004 / .005 / .010 kabul (iceride sayilir).
 
-EXCEL CIKTISI (3 sayfa):
-  PLATFORM       PLATFORM NO | OUT PROFILE .010 | OUT PROFILE .020 |
-                 PASS/FAIL (yesil / kirmizi) | ortalama | nokta | %5 sinir |
-                 max |sapma| | ozellik adi;  altta GENEL SONUC
-  PARCA BILGISI  Summary bilgileri + kaynak dosya
-  NOKTALAR       tum noktalar renkli
-
-1) KURULUM (bir kere, Windows cmd):
-    py -m pip install PySide6 openpyxl pyinstaller
-  Denemek icin derlemeden calistirma:
-    py plat_app.py
-
-2) DERLEME (Windows, cmd):
-  py -m PyInstaller --onedir --windowed --noupx --icon=plat_icon.ico ^
-    --name "PLATFORM DEGERLENDIRME" plat_app.py
-
-  Exe:  dist\PLATFORM DEGERLENDIRME\PLATFORM DEGERLENDIRME.exe
-  (Not: komut "py -m PyInstaller" - buyuk P ve I ile.)
-
-Dosyalar: plat_app.py (calistirilan), plat_core.py, plat_theme.py,
-plat_icon.ico, tests\test_core.py (istege bagli: py tests\test_core.py)
+KAYNAK (degistirmek isterseniz)
+  xlsm\PlatformAnaliz.bas  makro kodu (Excel'de Alt+F11 ile de gorulur)
+  xlsm\make_xlsm.py        .xlsm'i bastan uretir:  py xlsm\make_xlsm.py
+                           (gerekir: py -m pip install xlsxwriter)
+  xlsm\vba_bin.py          makroyu dosyanin icine yazan yardimci
