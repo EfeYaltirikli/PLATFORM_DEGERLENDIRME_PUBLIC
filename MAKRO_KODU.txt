@@ -6,8 +6,8 @@ Option Explicit
 '   |sapma| <= .005             iceride
 '   .005 < |sapma| <= .010      "OUT PROFILE .010" noktasi
 '   |sapma| > .010              "OUT PROFILE .020" noktasi
-'   PASS = .020 noktasi yok  ve  .010 noktasi <= N x %5 (tam sayiya
-'          yuvarlanir, ,5 yukari)  ve  |ortalama| <= .004
+'   PASS = .020 noktasi yok  ve  .010 noktasi < N x %5 (yuvarlama yok:
+'          39 nokta -> 1,95: 1 nokta gecer, 2 nokta FAIL)  ve  |ortalama| <= .004
 '   Tam .004 / .005 / .010 kabul.
 
 Private Const TOL_IN As Double = 0.005
@@ -57,8 +57,8 @@ Public Sub Temizle()
     Dim sh As Worksheet, adr As Variant, i As Long
     Set sh = AnalizSayfasi()
     Application.ScreenUpdating = False
-    adr = Array("B4", "F4", "B5", "F5", "B6", "F6", "B7", "F7", "B8", "F8")
-    For i = 0 To 9
+    adr = Array("B4", "F4", "B5", "F5", "B6")
+    For i = 0 To 4
         sh.Range(adr(i)).Value = ""
     Next i
     sh.Range("A2").Value = "Rapor yuklenmedi.  EXCEL YUKLE dugmesine basin."
@@ -166,10 +166,10 @@ SonrakiSutun:
         Exit Function
     End If
 
-    Dim n() As Long, c1() As Long, c2() As Long, lim() As Long
+    Dim n() As Long, c1() As Long, c2() As Long, lim() As Double, c1Ok() As Boolean
     Dim ort() As Double, mx() As Double, ok() As Boolean, ortOk() As Boolean
     Dim pts() As Variant, top As Double, gecen As Long
-    ReDim n(1 To np): ReDim c1(1 To np): ReDim c2(1 To np): ReDim lim(1 To np)
+    ReDim n(1 To np): ReDim c1(1 To np): ReDim c2(1 To np): ReDim lim(1 To np): ReDim c1Ok(1 To np)
     ReDim ort(1 To np): ReDim mx(1 To np): ReDim ok(1 To np): ReDim ortOk(1 To np)
     ReDim pts(1 To npt, 1 To np)
     For i = 1 To np
@@ -189,19 +189,22 @@ SonrakiSutun:
             End If
         Next r
         If n(i) > 0 Then ort(i) = top / n(i)
-        lim(i) = (n(i) * 5 + 50) \ 100              ' %5, yarim yukari
+        lim(i) = n(i) * 5 / 100                     ' %5, yuvarlanmaz
+        c1Ok(i) = (c1(i) * 100 < n(i) * 5)          ' tam sayilarla: c1 < N x %5
         ortOk(i) = (Abs(ort(i)) <= TOL_AVG + EPS)
-        ok(i) = (n(i) > 0 And c2(i) = 0 And c1(i) <= lim(i) And ortOk(i))
+        ok(i) = (n(i) > 0 And c2(i) = 0 And c1Ok(i) And ortOk(i))
         If ok(i) Then gecen = gecen + 1
     Next i
 
     ' ---- ANALIZ sayfasi
     Dim sh As Worksheet, rg As Range, o() As Variant, adr As Variant, genel As Boolean
     Set sh = AnalizSayfasi()
-    adr = Array("B4", "F4", "B5", "F5", "B6", "F6", "B7", "F7", "B8", "F8")
-    For i = 0 To 9
-        sh.Range(adr(i)).Value = "'" & info(i + 1)
-    Next i
+    ' Part No, Serial No (ilk 5 hane), Operator, CMM, Location
+    sh.Range("B4").Value = "'" & info(1)
+    sh.Range("F4").Value = "'" & Left$(info(2), 5)
+    sh.Range("B5").Value = "'" & info(4)
+    sh.Range("F5").Value = "'" & info(5)
+    sh.Range("B6").Value = "'" & info(10)
     sh.Range("A2").Value = "Dosya: " & DosyaKisa(yol) & "     Analiz: " & Format(Now, "dd.mm.yyyy hh:nn")
 
     sh.Range(sh.Cells(HEAD_ROW + 1, 1), sh.Cells(HEAD_ROW + MAX_ROWS, 8)).Clear
@@ -222,11 +225,12 @@ SonrakiSutun:
     rg.Columns(1).HorizontalAlignment = xlLeft
     rg.Columns(1).Font.Bold = True
     rg.Columns(4).NumberFormat = "0.00000"
+    rg.Columns(6).NumberFormat = "0.00"
     rg.Columns(7).NumberFormat = "0.0000"
     For i = 1 To np
         r = HEAD_ROW + i
         Boya sh.Cells(r, 8), ok(i)
-        If c1(i) > 0 Then sh.Cells(r, 2).Interior.Color = IIf(c1(i) <= lim(i), RGB(255, 217, 102), RGB(255, 124, 128))
+        If Not c1Ok(i) Then sh.Cells(r, 2).Interior.Color = RGB(255, 124, 128)
         If c2(i) > 0 Then sh.Cells(r, 3).Interior.Color = RGB(255, 124, 128)
         If Not ortOk(i) Then sh.Cells(r, 4).Interior.Color = RGB(255, 124, 128)
     Next i
@@ -242,7 +246,7 @@ SonrakiSutun:
     Cerceve sh.Cells(r, 8)
     Boya sh.Cells(r, 8), genel
     sh.Cells(r + 1, 1).Value = "Kural: |sapma| <= .005 iceride;  .005 < |sapma| <= .010 nokta sayisi " & _
-        "<= toplam noktanin %5'i (tam sayiya yuvarlanir);  |sapma| > .010 nokta yok;  |ortalama| <= .004."
+        "< toplam noktanin %5'i (yuvarlanmaz);  |sapma| > .010 nokta yok;  |ortalama| <= .004."
     With sh.Cells(r + 1, 1).Font
         .Italic = True
         .Size = 9

@@ -1,4 +1,4 @@
-PLATFORM DEGERLENDIRME 2.0.0  (makrolu Excel)   created by EYALTIRIKLI
+PLATFORM DEGERLENDIRME 2.1.0  (makrolu Excel)   created by EYALTIRIKLI
 =======================================================================
 
 KULLANIM
@@ -15,14 +15,14 @@ KULLANIM
      kaydeder (ad: PartNo_SerialNo_PLATFORM.xlsx).
 
 ANALIZ sayfasi
-  - Ustte parca bilgileri (Summary sayfasi): Part No, Serial No,
-    Operation, Operator, CMM, NC W/S, Spindle, Date, Company, Location.
+  - Ustte parca bilgileri (Summary sayfasi): Part No, Serial No (ilk 5 hane),
+    Operator, CMM, Location.
   - Sagda GENEL SONUC: butun platformlar PASS ise yesil PASS, biri bile
     FAIL ise kirmizi FAIL.
   - Tablo: PLATFORM NO | OUT PROFILE .010 | OUT PROFILE .020 | AVERAGE |
     TOTAL POINT COUNT | %5 LIMIT | MAX |DEV| | PASS/FAIL (en sagda).
-    .010 sayisi sinirdaysa sari, siniri asarsa kirmizi; .020 > 0 kirmizi;
-    ortalama +/-.004 disindaysa kirmizi.
+    Yalniz FAIL sebebi kirmizi: .010 sayisi siniri asarsa, .020 > 0 ise,
+    ortalama +/-.004 disindaysa.
 NOKTALAR sayfasi: butun degerler; .005-.010 arasi sari, .010 ustu kirmizi.
 
 OKUMA
@@ -37,8 +37,8 @@ KURAL (her platform, N = o platformdaki nokta sayisi)
   .005 < |sapma| <= .010       -> "OUT PROFILE .010" noktasi
   |sapma| > .010               -> "OUT PROFILE .020" noktasi
   PASS =  .020 noktasi YOK
-          ve .010 noktasi sayisi <= N x %5  (tam sayiya yuvarlanir, ,5 yukari:
-             40 -> 2, 30 -> 2, 45 -> 2, 50 -> 3; sinira esit gecer)
+          ve .010 noktasi sayisi < N x %5  (yuvarlanmaz: 39 nokta -> 1,95:
+             1 nokta gecer, 2 nokta FAIL)
           ve |ortalama sapma| <= .004  (.008 profil)
   Tam .004 / .005 / .010 kabul (iceride sayilir).
 

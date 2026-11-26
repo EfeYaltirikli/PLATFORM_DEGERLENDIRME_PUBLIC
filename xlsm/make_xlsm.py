@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import vba_bin  # noqa: E402
 
-VERSION = "2.0.2"
+VERSION = "2.1.0"
 HEAD_ROW = 10            # Excel row of the table header (same as in the macro)
 
 
@@ -53,14 +53,14 @@ def build(out, macro=True):
     ws.write("F1", "v%s  ·  created by EYALTIRIKLI" % VERSION, sub)
     ws.set_row(0, 30)
 
-    labels = (("Part No", "Serial No"), ("Operation", "Operator"), ("CMM", "NC W/S"),
-              ("Spindle", "Date"), ("Company", "Location"))
+    labels = (("Part No", "Serial No"), ("Operator", "CMM"), ("Location", None))
     for i, (l1, l2) in enumerate(labels):
         r = 3 + i
         ws.write(r, 0, l1, lab)
         ws.merge_range(r, 1, r, 3, "", val)
-        ws.write(r, 4, l2, lab)
-        ws.merge_range(r, 5, r, 6, "", val)
+        if l2:
+            ws.write(r, 4, l2, lab)
+            ws.merge_range(r, 5, r, 6, "", val)
         ws.set_row(r, 20)
     ws.write("H3", "GENEL SONUÇ", F(bold=True, align="center", font_color="#595959"))
     ws.merge_range("H4:H8", "—", big)
