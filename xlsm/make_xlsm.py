@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import vba_bin  # noqa: E402
 
-VERSION = "2.0.0"
+VERSION = "2.0.2"
 HEAD_ROW = 10            # Excel row of the table header (same as in the macro)
 
 
@@ -50,7 +50,7 @@ def build(out, macro=True):
         ws.set_column(c, c, w)
     ws.write("A1", "PLATFORM DEĞERLENDİRME", title)
     ws.write("A2", "Rapor yüklenmedi.  EXCEL YÜKLE düğmesine basın.", sub)
-    ws.write("E1", "v%s  ·  created by EYALTIRIKLI" % VERSION, sub)
+    ws.write("F1", "v%s  ·  created by EYALTIRIKLI" % VERSION, sub)
     ws.set_row(0, 30)
 
     labels = (("Part No", "Serial No"), ("Operation", "Operator"), ("CMM", "NC W/S"),
@@ -77,6 +77,8 @@ def build(out, macro=True):
                             "width": 140, "height": 30, "x_offset": 4, "y_offset": 4})
     ws.insert_button("C1", {"macro": "SonucuKaydet", "caption": "SONUCU KAYDET (.xlsx)",
                             "width": 160, "height": 30, "x_offset": 14, "y_offset": 4})
+    ws.insert_button("D1", {"macro": "Temizle", "caption": "TEMİZLE",
+                            "width": 100, "height": 30, "x_offset": 30, "y_offset": 4})
     ws.activate()
     for sh in (ws, wn):
         sh.set_landscape()

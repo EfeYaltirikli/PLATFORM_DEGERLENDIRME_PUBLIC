@@ -53,6 +53,29 @@ Public Sub SonucuKaydet()
     MsgBox "Kaydedildi:" & vbCrLf & CStr(f), vbInformation, BASLIK
 End Sub
 
+Public Sub Temizle()
+    Dim sh As Worksheet, adr As Variant, i As Long
+    Set sh = AnalizSayfasi()
+    Application.ScreenUpdating = False
+    adr = Array("B4", "F4", "B5", "F5", "B6", "F6", "B7", "F7", "B8", "F8")
+    For i = 0 To 9
+        sh.Range(adr(i)).Value = ""
+    Next i
+    sh.Range("A2").Value = "Rapor yuklenmedi.  EXCEL YUKLE dugmesine basin."
+    sh.Range(sh.Cells(HEAD_ROW + 1, 1), sh.Cells(HEAD_ROW + MAX_ROWS, 8)).Clear
+    With sh.Range("H4")
+        .Value = "-"
+        .Interior.Color = RGB(166, 166, 166)
+        .Font.Color = RGB(255, 255, 255)
+    End With
+    sh.Range("H9").Value = ""
+    With NoktaSayfasi()
+        .Cells.Clear
+        .Cells(1, 1).Value = "NOKTA"
+    End With
+    Application.ScreenUpdating = True
+End Sub
+
 ' ---------------------------------------------------------------- analiz
 
 Public Sub Analiz(ByVal yol As String)
