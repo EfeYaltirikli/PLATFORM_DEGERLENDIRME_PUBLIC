@@ -1,4 +1,4 @@
-PLATFORM DEGERLENDIRME 2.2.0  (makrolu Excel)
+PLATFORM DEGERLENDIRME 2.3.0  (makrolu Excel)
 =======================================================================
 
 KULLANIM
@@ -24,14 +24,15 @@ ANALYSIS sayfasi (sayfadaki yazilar Ingilizce)
     TOTAL POINT COUNT | %5 LIMIT | MAX |DEV| | PASS/FAIL (en sagda).
     Yalniz FAIL sebebi kirmizi: .010 sayisi siniri asarsa, .020 > 0 ise,
     ortalama +/-.004 disindaysa.
-POINTS sayfasi: butun degerler; .005-.010 arasi sari, .010 ustu kirmizi.
+POINTS sayfasi: rapordaki gibi satir = platform, sutun = nokta;
+  .005-.010 arasi sari, .010 ustu kirmizi.
 
 OKUMA
-  Platform sayfasi: A sutununda nokta sirasi (1, 2, 3 ...), B'den saga her
-  sutun bir platform (#1, #2 ...).  Basliginda "SPF" gecen sutun (her
-  noktadaki en buyuk deger) platform SAYILMAZ, atlanir.  Yalniz numarali
-  satirlar okunur; tablonun altindaki tolerans satirlari alinmaz.  Bos
-  hucre nokta sayilmaz.
+  Platform sayfasi: A sutununda platform numarasi (1, 2, 3 ...), her SATIR
+  bir platform.  B sutunu (basliginda "SPF": platformun maks/min degeri)
+  nokta SAYILMAZ, atlanir.  C'den saga her sutun o platformun bir noktasi
+  (PLATFORM_1 = 1. nokta).  Yalniz numarali satirlar okunur; tablonun
+  altindaki tolerans satirlari alinmaz.  Bos hucre nokta sayilmaz.
 
 KURAL (her platform, N = o platformdaki nokta sayisi)
   |sapma| <= .005              -> iceride (.010 profil)

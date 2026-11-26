@@ -1,6 +1,6 @@
 Option Explicit
 
-' PLATFORM DEGERLENDIRME - created by EYALTIRIKLI
+' PLATFORM DEGERLENDIRME
 ' Hexagon raporunu (.xlsx) okur, her platformu PASS / FAIL degerlendirir.
 ' Kural (her platform, N = o platformdaki nokta sayisi):
 '   |sapma| <= .005             iceride
@@ -71,7 +71,7 @@ Public Sub Temizle()
     sh.Range("H5").Value = ""
     With NoktaSayfasi()
         .Cells.Clear
-        .Cells(1, 1).Value = "POINT"
+        .Cells(1, 1).Value = "PLATFORM"
     End With
     Application.ScreenUpdating = True
 End Sub
@@ -118,7 +118,10 @@ Private Function Degerlendir(v As Variant, info() As String, ByVal yol As String
     nr = UBound(v, 1)
     nc = UBound(v, 2)
 
-    ' veri: A sutununda 1, 2, 3 ... olan satirlar (alttaki tolerans satirlari degil)
+    ' Platform sayfasi: her SATIR bir platform (A sutununda 1, 2, 3 ...),
+    ' C'den saga her sutun o platformun bir noktasi (PLATFORM_1 = 1. nokta).
+    ' Basliginda "SPF" gecen sutun (B: platformun maks/min degeri) nokta
+    ' degildir, atlanir.  Alttaki tolerans satirlari alinmaz.
     For r = 1 To nr
         If TamSayi(v(r, 1), 1) Then
             For c = 2 To nc
@@ -132,7 +135,7 @@ Private Function Degerlendir(v As Variant, info() As String, ByVal yol As String
     Next r
     If bas = 0 Then
         Degerlendir = "No data found on the Platform sheet" & vbCrLf & _
-                      "(point numbers 1, 2, 3 ... expected in column A)."
+                      "(platform numbers 1, 2, 3 ... expected in column A)."
         Exit Function
     End If
     son = bas
@@ -140,10 +143,8 @@ Private Function Degerlendir(v As Variant, info() As String, ByVal yol As String
         If Not TamSayi(v(son + 1, 1), son - bas + 2) Then Exit Do
         son = son + 1
     Loop
-    npt = son - bas + 1
+    np = son - bas + 1
 
-    ' platformlar: B'den saga sayi iceren her sutun.  Basliginda "SPF"
-    ' gecen sutun (her noktadaki en buyuk deger) platform degildir, atlanir.
     Dim cols() As Long, h As Long, spf As Boolean
     ReDim cols(1 To nc)
     For c = 2 To nc
@@ -154,29 +155,30 @@ Private Function Degerlendir(v As Variant, info() As String, ByVal yol As String
         If spf Then GoTo SonrakiSutun
         For r = bas To son
             If Sayi(v(r, c), d) Then
-                np = np + 1
-                cols(np) = c
+                npt = npt + 1
+                cols(npt) = c
                 Exit For
             End If
         Next r
 SonrakiSutun:
     Next c
-    If np = 0 Then
+    If npt = 0 Then
         Degerlendir = "No numeric deviation values on the Platform sheet."
         Exit Function
     End If
 
     Dim n() As Long, c1() As Long, c2() As Long, lim() As Double, c1Ok() As Boolean
     Dim ort() As Double, mx() As Double, ok() As Boolean, ortOk() As Boolean
-    Dim pts() As Variant, top As Double, gecen As Long
+    Dim pts() As Variant, top As Double, gecen As Long, j As Long
     ReDim n(1 To np): ReDim c1(1 To np): ReDim c2(1 To np): ReDim lim(1 To np): ReDim c1Ok(1 To np)
     ReDim ort(1 To np): ReDim mx(1 To np): ReDim ok(1 To np): ReDim ortOk(1 To np)
-    ReDim pts(1 To npt, 1 To np)
+    ReDim pts(1 To np, 1 To npt)
     For i = 1 To np
         top = 0
-        For r = bas To son
-            If Sayi(v(r, cols(i)), d) Then
-                pts(r - bas + 1, i) = d
+        r = bas + i - 1
+        For j = 1 To npt
+            If Sayi(v(r, cols(j)), d) Then
+                pts(i, j) = d
                 n(i) = n(i) + 1
                 top = top + d
                 a = Abs(d)
@@ -187,7 +189,7 @@ SonrakiSutun:
                     c1(i) = c1(i) + 1
                 End If
             End If
-        Next r
+        Next j
         If n(i) > 0 Then ort(i) = top / n(i)
         lim(i) = n(i) * 5 / 100                     ' %5, yuvarlanmaz
         c1Ok(i) = (c1(i) * 100 < n(i) * 5)          ' tam sayilarla: c1 < N x %5
@@ -258,45 +260,44 @@ SonrakiSutun:
     End With
     sh.Range("H5").Value = gecen & " / " & np & " platforms PASS"
 
-    ' ---- NOKTALAR sayfasi
+    ' ---- POINTS sayfasi (rapordaki gibi: satir = platform, sutun = nokta)
     Dim sn As Worksheet
     Set sn = NoktaSayfasi()
     sn.Cells.Clear
-    sn.Cells(1, 1).Value = "POINT"
-    Cerceve sn.Cells(1, 1)
-    sn.Cells(1, 1).Font.Bold = True
-    sn.Cells(1, 1).Interior.Color = RGB(217, 225, 242)
+    sn.Cells(1, 1).Value = "PLATFORM"
+    For j = 1 To npt
+        sn.Cells(1, j + 1).Value = j
+    Next j
+    Set rg = sn.Range(sn.Cells(1, 1), sn.Cells(1, npt + 1))
+    Cerceve rg
+    rg.Font.Bold = True
+    rg.Interior.Color = RGB(217, 225, 242)
     For i = 1 To np
-        sn.Cells(1, i + 1).Value = "#" & i
-        Boya sn.Cells(1, i + 1), ok(i)
+        sn.Cells(i + 1, 1).Value = "#" & i
+        Boya sn.Cells(i + 1, 1), ok(i)
     Next i
-    Cerceve sn.Range(sn.Cells(1, 2), sn.Cells(1, np + 1))
-    For r = 1 To npt
-        sn.Cells(r + 1, 1).Value = r
-    Next r
-    Cerceve sn.Range(sn.Cells(2, 1), sn.Cells(npt + 1, 1))
-    sn.Range(sn.Cells(2, 1), sn.Cells(npt + 1, 1)).Font.Bold = True
-    Set rg = sn.Range(sn.Cells(2, 2), sn.Cells(npt + 1, np + 1))
+    Cerceve sn.Range(sn.Cells(2, 1), sn.Cells(np + 1, 1))
+    Set rg = sn.Range(sn.Cells(2, 2), sn.Cells(np + 1, npt + 1))
     rg.Value = pts
     Cerceve rg
     rg.NumberFormat = "0.0000"
     rg.Interior.Color = RGB(198, 239, 206)
     For i = 1 To np
-        For r = 1 To npt
-            If Not IsEmpty(pts(r, i)) Then
-                a = Abs(pts(r, i))
+        For j = 1 To npt
+            If Not IsEmpty(pts(i, j)) Then
+                a = Abs(pts(i, j))
                 If a > TOL_OUT + EPS Then
-                    rg.Cells(r, i).Interior.Color = RGB(255, 124, 128)
+                    rg.Cells(i, j).Interior.Color = RGB(255, 124, 128)
                 ElseIf a > TOL_IN + EPS Then
-                    rg.Cells(r, i).Interior.Color = RGB(255, 217, 102)
+                    rg.Cells(i, j).Interior.Color = RGB(255, 217, 102)
                 End If
             Else
-                rg.Cells(r, i).Interior.Pattern = xlNone
+                rg.Cells(i, j).Interior.Pattern = xlNone
             End If
-        Next r
+        Next j
     Next i
-    sn.Columns(1).ColumnWidth = 8
-    sn.Range(sn.Columns(2), sn.Columns(np + 1)).ColumnWidth = 9
+    sn.Columns(1).ColumnWidth = 11
+    sn.Range(sn.Columns(2), sn.Columns(npt + 1)).ColumnWidth = 8
 End Function
 
 ' ---------------------------------------------------------------- sayfalar

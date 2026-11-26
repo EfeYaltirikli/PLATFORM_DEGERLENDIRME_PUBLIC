@@ -13,7 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import vba_bin  # noqa: E402
 
-VERSION = "2.2.0"
+VERSION = "2.3.0"
 HEAD_ROW = 6             # Excel row of the table header (same as in the macro)
 
 
@@ -81,9 +81,9 @@ def build(out, macro=True):
         sh.set_paper(9)
         sh.fit_to_pages(1, 0)
 
-    wn.write("A1", "POINT", head)
+    wn.write("A1", "PLATFORM", head)
     wn.freeze_panes(1, 1)
-    wn.set_column(0, 0, 8)
+    wn.set_column(0, 0, 11)
     wb.close()
 
 
