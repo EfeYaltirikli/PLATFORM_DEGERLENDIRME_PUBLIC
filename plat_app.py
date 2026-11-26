@@ -168,7 +168,7 @@ class ResultModel(QAbstractTableModel):
             avg = p["avg"] if abs(p["avg"]) >= 5e-6 else 0.0
             return ("PLATFORM #%d" % p["no"], "PASS" if p["pass"] else "FAIL",
                     p["c010"], p["c020"], "%.5f" % avg, p["n"],
-                    "%.2f" % p["limit"], _f4(p["max"]), p["name"])[c]
+                    p["limit"], _f4(p["max"]), p["name"])[c]
         if role == Qt.TextAlignmentRole:
             return int((Qt.AlignLeft if c in (0, 8) else Qt.AlignHCenter) | Qt.AlignVCenter)
         if role == Qt.BackgroundRole:
@@ -198,7 +198,7 @@ class ResultModel(QAbstractTableModel):
             if p["c020"]:
                 why.append("%d nokta ±.010 dışında" % p["c020"])
             if p["c010"] >= p["limit"]:
-                why.append(".005–.010 arası %d nokta (sınır < %.2f)" % (p["c010"], p["limit"]))
+                why.append(".005–.010 arası %d nokta (sınır < %d)" % (p["c010"], p["limit"]))
             if not p["avg_ok"]:
                 why.append("ortalama %.5f  (±.004 dışında)" % p["avg"])
             return ("FAIL: " + ";  ".join(why)) if why else \
@@ -352,7 +352,7 @@ class Window(QMainWindow):
         b.addLayout(top)
 
         rule = label("Kural (her platform):  |sapma| ≤ .005 içeride  ·  .005 < |sapma| ≤ .010 "
-                     "nokta sayısı < toplam noktanın %5'i  ·  |sapma| > .010 nokta yok  ·  "
+                     "nokta sayısı < toplam noktanın %5'i (yuvarlanmış)  ·  |sapma| > .010 nokta yok  ·  "
                      "|ortalama| ≤ .004.   Tam .004 / .005 / .010 kabul.", muted=True)
         rule.setWordWrap(True)
         b.addWidget(rule)

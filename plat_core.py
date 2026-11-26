@@ -14,7 +14,7 @@ number of points in it:
 import os
 import re
 
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 APP_TITLE = "PLATFORM DEĞERLENDİRME"
 APP_CREDIT = "created by EYALTIRIKLI"
 
@@ -182,7 +182,9 @@ def judge(values):
     n = len(pts)
     c010 = sum(1 for v in pts if TOL_IN + EPS < abs(v) <= TOL_OUT + EPS)
     c020 = sum(1 for v in pts if abs(v) > TOL_OUT + EPS)
-    limit = n * PCT
+    # 1.0.1: the 5 % is a whole number of points, rounded half up
+    # (40 -> 2, 30 -> 1.5 -> 2, 50 -> 2.5 -> 3, 45 -> 2.25 -> 2)
+    limit = int(n * PCT + 0.5)
     avg = (sum(pts) / n) if n else 0.0
     avg_ok = abs(avg) <= TOL_AVG + EPS
     ok = n > 0 and c020 == 0 and c010 < limit and avg_ok
@@ -280,7 +282,7 @@ def export_xlsx(rep, path):
     for i, p in enumerate(rep["platforms"], 2):
         vals = ("PLATFORM #%d" % p["no"], p["c010"], p["c020"],
                 "PASS" if p["pass"] else "FAIL", round(p["avg"], 5), p["n"],
-                round(p["limit"], 2), round(p["max"], 4), p["name"])
+                p["limit"], round(p["max"], 4), p["name"])
         for c, v in enumerate(vals, 1):
             x = ws.cell(row=i, column=c, value=v)
             x.font, x.border = norm, box
@@ -308,7 +310,7 @@ def export_xlsx(rep, path):
     ws.cell(row=r, column=2, value="%d / %d platform PASS" % (ok, len(rep["platforms"]))).font = norm
     ws.cell(row=r + 1, column=1,
             value="Kural: |sapma| ≤ .005 içeride;  .005 < |sapma| ≤ .010 nokta sayısı "
-                  "< toplam noktanın %5'i;  |sapma| > .010 nokta yok;  |ortalama| ≤ .004.").font = \
+                  "< toplam noktanın %5'i (tam sayıya yuvarlanır);  |sapma| > .010 nokta yok;  |ortalama| ≤ .004.").font = \
         Font(name="Calibri", size=9, italic=True, color="595959")
     for c, w in enumerate((18, 20, 20, 14, 12, 13, 10, 11, 30), 1):
         ws.column_dimensions[get_column_letter(c)].width = w

@@ -1,4 +1,4 @@
-PLATFORM DEGERLENDIRME 1.0.0  (Qt / PySide6)   created by EYALTIRIKLI
+PLATFORM DEGERLENDIRME 1.0.1  (Qt / PySide6)   created by EYALTIRIKLI
 =====================================================================
 
 Ne yapar: Hexagon raporunu (.xlsx) okur, her platformu PASS / FAIL
@@ -25,7 +25,8 @@ KURAL (her platform, N = o platformdaki nokta sayisi):
   .005 < |sapma| <= .010       -> "OUT PROFILE .010" noktasi
   |sapma| > .010               -> "OUT PROFILE .020" noktasi
   PASS =  .020 noktasi YOK
-          ve .010 noktasi sayisi < N x %5
+          ve .010 noktasi sayisi < N x %5 (tam sayiya yuvarlanir:
+            40 -> 2, 30 -> 1,5 -> 2, 50 -> 2,5 -> 3, 45 -> 2,25 -> 2)
           ve |ortalama sapma| <= .004  (.008 profil)
   Tam .004 / .005 / .010 kabul (iceride sayilir).
 
