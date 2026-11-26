@@ -1,4 +1,4 @@
-PLATFORM DEGERLENDIRME 2.1.0  (makrolu Excel)   created by EYALTIRIKLI
+PLATFORM DEGERLENDIRME 2.2.0  (makrolu Excel)
 =======================================================================
 
 KULLANIM
@@ -10,20 +10,21 @@ KULLANIM
      engelledi").  O zaman: Excel'i kapatin -> dosyaya sag tik ->
      Ozellikler -> alttaki "Engellemeyi kaldir / Unblock" kutusunu
      isaretleyin -> Tamam.  Bir kere yapmaniz yeter.
-  3. EXCEL YUKLE  -> Hexagon raporunu (.xlsx) secin.  Analiz hemen yapilir.
-  4. SONUCU KAYDET (.xlsx) -> sonucu makrosuz ayri bir Excel olarak
+  3. LOAD REPORT  -> Hexagon raporunu (.xlsx) secin.  Analiz hemen yapilir.
+  4. SAVE RESULT (.xlsx) -> sonucu makrosuz ayri bir Excel olarak
      kaydeder (ad: PartNo_SerialNo_PLATFORM.xlsx).
+  5. CLEAR -> son analizi siler.
 
-ANALIZ sayfasi
+ANALYSIS sayfasi (sayfadaki yazilar Ingilizce)
   - Ustte parca bilgileri (Summary sayfasi): Part No, Serial No (ilk 5 hane),
-    Operator, CMM, Location.
-  - Sagda GENEL SONUC: butun platformlar PASS ise yesil PASS, biri bile
+    CMM, Date.
+  - Sagda OVERALL RESULT: butun platformlar PASS ise yesil PASS, biri bile
     FAIL ise kirmizi FAIL.
   - Tablo: PLATFORM NO | OUT PROFILE .010 | OUT PROFILE .020 | AVERAGE |
     TOTAL POINT COUNT | %5 LIMIT | MAX |DEV| | PASS/FAIL (en sagda).
     Yalniz FAIL sebebi kirmizi: .010 sayisi siniri asarsa, .020 > 0 ise,
     ortalama +/-.004 disindaysa.
-NOKTALAR sayfasi: butun degerler; .005-.010 arasi sari, .010 ustu kirmizi.
+POINTS sayfasi: butun degerler; .005-.010 arasi sari, .010 ustu kirmizi.
 
 OKUMA
   Platform sayfasi: A sutununda nokta sirasi (1, 2, 3 ...), B'den saga her

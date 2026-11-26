@@ -15,16 +15,16 @@ Private Const TOL_IN As Double = 0.005
 Private Const TOL_OUT As Double = 0.01
 Private Const TOL_AVG As Double = 0.004
 Private Const EPS As Double = 0.000000001
-Private Const HEAD_ROW As Long = 10
+Private Const HEAD_ROW As Long = 6
 Private Const MAX_ROWS As Long = 2000
-Private Const BASLIK As String = "PLATFORM DEGERLENDIRME"
+Private Const BASLIK As String = "PLATFORM EVALUATION"
 
 ' ---------------------------------------------------------------- dugmeler
 
 Public Sub RaporYukle()
     Dim f As Variant
     f = Application.GetOpenFilename("Excel (*.xlsx;*.xlsm;*.xls),*.xlsx;*.xlsm;*.xls", , _
-                                    "Hexagon raporu secin")
+                                    "Select Hexagon report")
     If VarType(f) = vbBoolean Then Exit Sub
     Analiz CStr(f)
 End Sub
@@ -32,7 +32,7 @@ End Sub
 Public Sub SonucuKaydet()
     Dim f As Variant, yeni As Workbook, s As Worksheet, k As Long
     If Len(CStr(AnalizSayfasi().Cells(HEAD_ROW + 1, 1).Value)) = 0 Then
-        MsgBox "Once EXCEL YUKLE ile bir rapor yukleyin.", vbInformation, BASLIK
+        MsgBox "Load a report first (LOAD REPORT).", vbInformation, BASLIK
         Exit Sub
     End If
     f = Application.GetSaveAsFilename(InitialFileName:=DosyaAdi(), _
@@ -51,28 +51,28 @@ Public Sub SonucuKaydet()
     Application.DisplayAlerts = True
     yeni.Close SaveChanges:=False
     Application.ScreenUpdating = True
-    MsgBox "Kaydedildi:" & vbCrLf & CStr(f), vbInformation, BASLIK
+    MsgBox "Saved:" & vbCrLf & CStr(f), vbInformation, BASLIK
 End Sub
 
 Public Sub Temizle()
     Dim sh As Worksheet, adr As Variant, i As Long
     Set sh = AnalizSayfasi()
     Application.ScreenUpdating = False
-    adr = Array("B4", "F4", "B5", "F5", "B6")
-    For i = 0 To 4
+    adr = Array("B3", "F3", "B4", "F4")
+    For i = 0 To 3
         sh.Range(adr(i)).Value = ""
     Next i
-    sh.Range("A2").Value = "Rapor yuklenmedi.  EXCEL YUKLE dugmesine basin."
+    sh.Range("A2").Value = "No report loaded."
     sh.Range(sh.Cells(HEAD_ROW + 1, 1), sh.Cells(HEAD_ROW + MAX_ROWS, 8)).Clear
-    With sh.Range("H4")
+    With sh.Range("H3")
         .Value = "-"
         .Interior.Color = RGB(166, 166, 166)
         .Font.Color = RGB(255, 255, 255)
     End With
-    sh.Range("H9").Value = ""
+    sh.Range("H5").Value = ""
     With NoktaSayfasi()
         .Cells.Clear
-        .Cells(1, 1).Value = "NOKTA"
+        .Cells(1, 1).Value = "POINT"
     End With
     Application.ScreenUpdating = True
 End Sub
@@ -89,7 +89,7 @@ Public Sub Analiz(ByVal yol As String)
     Set wb = Workbooks.Open(Filename:=yol, UpdateLinks:=0, ReadOnly:=True, AddToMru:=False)
     Set ws = SayfaBul(wb, "platform")
     If ws Is Nothing Then
-        msg = "'Platform' sayfasi bulunamadi."
+        msg = "'Platform' sheet not found."
         GoTo Bitir
     End If
     v = AlanOku(ws)
@@ -109,7 +109,7 @@ Bitir:
     If Len(msg) > 0 Then MsgBox msg, vbExclamation, BASLIK
     Exit Sub
 Hata:
-    msg = "Hata: " & Err.Description
+    msg = "Error: " & Err.Description
     Resume Bitir
 End Sub
 
@@ -132,8 +132,8 @@ Private Function Degerlendir(v As Variant, info() As String, ByVal yol As String
         End If
     Next r
     If bas = 0 Then
-        Degerlendir = "Platform sayfasinda veri bulunamadi" & vbCrLf & _
-                      "(A sutununda 1, 2, 3 ... nokta sirasi bekleniyor)."
+        Degerlendir = "No data found on the Platform sheet" & vbCrLf & _
+                      "(point numbers 1, 2, 3 ... expected in column A)."
         Exit Function
     End If
     son = bas
@@ -163,7 +163,7 @@ Private Function Degerlendir(v As Variant, info() As String, ByVal yol As String
 SonrakiSutun:
     Next c
     If np = 0 Then
-        Degerlendir = "Platform sayfasinda sayisal sapma degeri yok."
+        Degerlendir = "No numeric deviation values on the Platform sheet."
         Exit Function
     End If
 
@@ -200,13 +200,12 @@ SonrakiSutun:
     ' ---- ANALIZ sayfasi
     Dim sh As Worksheet, rg As Range, o() As Variant, adr As Variant, genel As Boolean
     Set sh = AnalizSayfasi()
-    ' Part No, Serial No (ilk 5 hane), Operator, CMM, Location
-    sh.Range("B4").Value = "'" & info(1)
-    sh.Range("F4").Value = "'" & Left$(info(2), 5)
-    sh.Range("B5").Value = "'" & info(4)
-    sh.Range("F5").Value = "'" & info(5)
-    sh.Range("B6").Value = "'" & info(10)
-    sh.Range("A2").Value = "Dosya: " & DosyaKisa(yol) & "     Analiz: " & Format(Now, "dd.mm.yyyy hh:nn")
+    ' Part No, Serial No (ilk 5 hane), CMM, Date
+    sh.Range("B3").Value = "'" & info(1)
+    sh.Range("F3").Value = "'" & Left$(info(2), 5)
+    sh.Range("B4").Value = "'" & info(5)
+    sh.Range("F4").Value = "'" & info(8)
+    sh.Range("A2").Value = "File: " & DosyaKisa(yol) & "     Analyzed: " & Format(Now, "dd.mm.yyyy hh:nn")
 
     sh.Range(sh.Cells(HEAD_ROW + 1, 1), sh.Cells(HEAD_ROW + MAX_ROWS, 8)).Clear
     ReDim o(1 To np, 1 To 8)
@@ -238,33 +237,33 @@ SonrakiSutun:
 
     genel = (gecen = np)
     r = HEAD_ROW + np + 2
-    sh.Cells(r, 1).Value = "GENEL SONUC"
-    sh.Cells(r, 2).Value = gecen & " / " & np & " platform PASS"
+    sh.Cells(r, 1).Value = "OVERALL RESULT"
+    sh.Cells(r, 2).Value = gecen & " / " & np & " platforms PASS"
     sh.Cells(r, 8).Value = IIf(genel, "PASS", "FAIL")
     Cerceve sh.Cells(r, 1)
     sh.Cells(r, 1).Font.Bold = True
     sh.Cells(r, 2).Font.Name = "Calibri"
     Cerceve sh.Cells(r, 8)
     Boya sh.Cells(r, 8), genel
-    sh.Cells(r + 1, 1).Value = "Kural: |sapma| <= .005 iceride;  .005 < |sapma| <= .010 nokta sayisi " & _
-        "< toplam noktanin %5'i (yuvarlanmaz);  |sapma| > .010 nokta yok;  |ortalama| <= .004."
+    sh.Cells(r + 1, 1).Value = "Rule: |dev| <= .005 in profile;  points with .005 < |dev| <= .010 " & _
+        "< 5% of total points;  no point with |dev| > .010;  |average| <= .004."
     With sh.Cells(r + 1, 1).Font
         .Italic = True
         .Size = 9
         .Color = RGB(89, 89, 89)
     End With
-    With sh.Range("H4")
+    With sh.Range("H3")
         .Value = IIf(genel, "PASS", "FAIL")
         .Interior.Color = IIf(genel, RGB(0, 176, 80), RGB(255, 0, 0))
         .Font.Color = RGB(255, 255, 255)
     End With
-    sh.Range("H9").Value = gecen & " / " & np & " platform PASS"
+    sh.Range("H5").Value = gecen & " / " & np & " platforms PASS"
 
     ' ---- NOKTALAR sayfasi
     Dim sn As Worksheet
     Set sn = NoktaSayfasi()
     sn.Cells.Clear
-    sn.Cells(1, 1).Value = "NOKTA"
+    sn.Cells(1, 1).Value = "POINT"
     Cerceve sn.Cells(1, 1)
     sn.Cells(1, 1).Font.Bold = True
     sn.Cells(1, 1).Interior.Color = RGB(217, 225, 242)
@@ -303,13 +302,13 @@ End Function
 
 ' ---------------------------------------------------------------- sayfalar
 
-' ANALIZ ve NOKTALAR sayfalari adlarindan bulunur (yoksa 1. ve 2. sayfa)
+' ANALYSIS ve POINTS sayfalari adlarindan bulunur (yoksa 1. ve 2. sayfa)
 Private Function AnalizSayfasi() As Worksheet
     Set AnalizSayfasi = BuSayfa("anal", 1)
 End Function
 
 Private Function NoktaSayfasi() As Worksheet
-    Set NoktaSayfasi = BuSayfa("nokta", 2)
+    Set NoktaSayfasi = BuSayfa("point", 2)
 End Function
 
 Private Function BuSayfa(ByVal bas As String, ByVal sira As Long) As Worksheet
@@ -483,9 +482,9 @@ End Function
 
 Private Function DosyaAdi() As String
     Dim s As String, ch As Variant
-    s = Trim$(CStr(AnalizSayfasi().Range("B4").Value))
-    If Len(Trim$(CStr(AnalizSayfasi().Range("F4").Value))) > 0 Then s = s & "_" & Trim$(CStr(AnalizSayfasi().Range("F4").Value))
-    If Len(s) = 0 Then s = "RAPOR"
+    s = Trim$(CStr(AnalizSayfasi().Range("B3").Value))
+    If Len(Trim$(CStr(AnalizSayfasi().Range("F3").Value))) > 0 Then s = s & "_" & Trim$(CStr(AnalizSayfasi().Range("F3").Value))
+    If Len(s) = 0 Then s = "REPORT"
     For Each ch In Array("\", "/", ":", "*", "?", """", "<", ">", "|")
         s = Replace(s, ch, "_")
     Next ch
